@@ -1,22 +1,28 @@
-import React from 'react'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-// import Dashboard from './components/Header'
-// import uploadFiles from './pages/FilesUpload'
-// import FilesUpload from './pages/FilesUpload'
-
-import LoginForm from './authComponent/LoginForm'
-// import SignupForm from './authComponent/SignupForm'
-// import Qrcode from './component/Qrcode'
-// import Dashboard from './components/Header'
-
-
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import Dashboard from './pages/Dashboard';
+import DocumentPage from './pages/DocumentPage';
 const App = () => {
-  
   return (
     <div>
-    <LoginForm/>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/document/:id" element={<DocumentPage />} />
+        <Route path="/accounts/emailsignup" element={<SignUpPage />} />
+        {/* <Route path="/accounts/emailsignup" element={<SignUp />} /> */}
+       
+        
+        {/* Redirect to login by default */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

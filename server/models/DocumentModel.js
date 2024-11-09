@@ -45,6 +45,20 @@ const documentSchema = new mongoose.Schema({
   }
 });
 
+// Add a post-save middleware to update the user's documents array
+documentSchema.post('save', async function(doc) {
+  try {
+    const User = mongoose.model('User');
+    await User.findByIdAndUpdate(
+      doc.user,
+      { $addToSet: { documents: doc._id } },
+      { new: true }
+    );
+  } catch (error) {
+    console.error('Error updating user documents:', error);
+  }
+});
+
 const Document = mongoose.model('Document', documentSchema);
 
 module.exports = Document;

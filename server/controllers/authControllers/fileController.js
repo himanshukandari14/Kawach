@@ -1,4 +1,5 @@
 const Document = require('../../models/DocumentModel');
+const User = require('../../models/UserModel');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -65,9 +66,9 @@ exports.uploadFile = async (req, res) => {
         // Remove temporary file
         fs.unlinkSync(tempPath);
 
-        // Create document record with correct user ID
+        // Create document record with user ID from token
         const document = new Document({
-            user: req.user.id, // Changed to use req.user.id directly
+            user: req.user.id, // This will now be the correct user ID
             title: file.name,
             fileUrl: `/uploads/${fileName}`,
             encryptionKey: key.toString('hex'),
@@ -76,10 +77,18 @@ exports.uploadFile = async (req, res) => {
 
         await document.save();
 
+        // Populate user's documents (optional)
+        const user = await User.findById(req.user.id).populate('documents');
+
         return res.status(200).json({
             success: true,
             message: 'File uploaded successfully',
-            documentId: document._id
+            document: {
+                id: document._id,
+                title: document.title,
+                createdAt: document.createdAt,
+                isActive: document.isActive
+            }
         });
 
     } catch (error) {
@@ -87,6 +96,29 @@ exports.uploadFile = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Error uploading file',
+            error: error.message
+        });
+    }
+};
+
+// Add a new controller method to get user's documents
+exports.getUserDocuments = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+            .populate({
+                path: 'documents',
+                options: { sort: { createdAt: -1 } }
+            });
+
+        return res.status(200).json({
+            success: true,
+            documents: user.documents
+        });
+    } catch (error) {
+        console.error('Error fetching documents:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error fetching documents',
             error: error.message
         });
     }
