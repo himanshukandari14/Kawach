@@ -65,8 +65,14 @@ const DocumentPage = () => {
           },
         }
       );
-      setQrCode(response.data.qrCode);
-      setTimeLeft(300); // 5 minutes in seconds
+      
+      // Debug log to check response
+      console.log('QR Response:', response.data);
+      
+      // Update this to use the correct path from response
+      const qrCodeData = response.data.data?.qrCode || response.data.qrCodeImage;
+      setQrCode(qrCodeData);
+      setTimeLeft(300);
     } catch (error) {
       console.error('QR generation failed:', error);
       alert('Failed to generate QR code');
@@ -137,9 +143,15 @@ const DocumentPage = () => {
             {qrCode ? (
               <div className="text-center">
                 <img 
-                  src={qrCode} 
+                  src={qrCode} // Use the full data URL directly
                   alt="QR Code" 
-                  className="mx-auto mb-4 bg-white p-4 rounded-lg"
+                  className="mx-auto mb-4 bg-white p-4 rounded-lg w-64 h-64"
+                  onError={(e) => {
+                    console.error('Failed to load QR code image');
+                    e.target.style.display = 'none';
+                    setQrCode(null);
+                    alert('Failed to display QR code');
+                  }}
                 />
                 <div className="text-cyan-400 font-medium">
                   Expires in: {formatTime(timeLeft)}
