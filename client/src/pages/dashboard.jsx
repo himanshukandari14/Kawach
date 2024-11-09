@@ -1,12 +1,14 @@
 import Dashboard from './components/Header'
 
-const Dashboard = () => {
+
+
+const Profile = () => {
     return (
       <div>
-        <Dashboard />
+        <Dashboard/>
       </div>
     )
   }
   
-  export default Dashboard
+  export default Profile
   
