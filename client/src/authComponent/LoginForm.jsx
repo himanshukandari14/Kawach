@@ -37,13 +37,13 @@ const LoginForm = () => {
           <input 
             type='email' 
             placeholder='Email' 
-            className='mb-6 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[#fff] transition-all duration-300' 
-            onChange={(e)=>setUsername(e.target.value)} 
+            className='mb-6 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[#fff] transition-all duration-300 text-black' 
+            onChange={(e)=> setUsername(e.target.value)} 
           />
           <input 
             type='password' 
             placeholder='Password' 
-            className='mb-6 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[#fff] transition-all duration-300'  
+            className='mb-6 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[#fff] transition-all duration-300 text-black'  
             onChange={(e) => setPassword(e.target.value)} 
           />
 
