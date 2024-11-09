@@ -1,29 +1,39 @@
 const mongoose = require('mongoose');
 
+// Document schema definition
 const documentSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   title: {
     type: String,
-    required: true
+    required: true,
   },
   fileUrl: {
     type: String,
-    required: true
+    required: true,
   },
   encryptionKey: {
     type: String,
-    required: true
+    required: true,
   },
   encryptionIv: {
     type: String,
-    required: true
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
   expiryTime: {
     type: Date,
-    default: null
+    default: null, // Set on QR generation
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: true,
   },
   qrCode: {
     type: String,
@@ -32,15 +42,8 @@ const documentSchema = new mongoose.Schema({
   printToken: {
     type: String,
     default: null
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
   }
-}, { timestamps: true });
-
-module.exports = mongoose.model('Document', documentSchema);
+});
 
 // Add a post-save middleware to update the user's documents array
 documentSchema.post('save', async function(doc) {
