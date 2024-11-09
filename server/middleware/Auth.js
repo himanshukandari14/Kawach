@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const { findById } = require("../models/User.model");
-const User = require("../models/User.model");
+const { findById } = require("../models/UserModel");
+const User = require("../models/UserModel");
 require("dotenv").config();
 
 const verifyToken = (req, res, next) => {
