@@ -4,15 +4,13 @@ import { signupUser } from '../redux/slices/AuthSlice';
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import Navbar from '../component/Navbar';
+import Navbar from '../components/Navbar';
 
 const SignupForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,10 +21,13 @@ const SignupForm = () => {
     setError(null);
 
     try {
-      const resultAction = await dispatch(signupUser({ email, name, username, password }));
+      const resultAction = await dispatch(signupUser({ 
+        email, 
+        password 
+      }));
       
       if (signupUser.fulfilled.match(resultAction)) {
-        navigate('/verify-otp');
+        navigate('/dashboard');
       } else {
         setError(resultAction.payload);
       }
@@ -38,52 +39,76 @@ const SignupForm = () => {
   };
 
   return (
-   <>
-   <div className='bg-[#111] '>
-   <Navbar/>
-    <div className='min-h-screen flex justify-center items-center flex-col gap-4'>
-      <div className='form bg-[#F4F7FB] h-auto w-[90%] max-w-[450px] px-[5%] py-[8%] border border-gray-800 rounded-lg shadow-lg shadow-black/50'>
-        <h2 className='text-2xl mb-6 text-center text-[#1089D3]'>Sign Up</h2>
-        
-        <input 
-          type='text'
-          placeholder='Username'
-          className='mb-4 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[white] text-[#111]'
-          onChange={(e) => setUsername(e.target.value)}
-          required 
-        />
-        <input 
-          type='email'
-          placeholder='Email'
-          className='mb-4 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[white] text-white'
-          onChange={(e) => setEmail(e.target.value)}
-          required 
-        />
-        <input 
-          type='password'
-          placeholder='Password'
-          className='mb-6 p-3 border border-gray-700 rounded-lg w-full focus:outline-none focus:border-blue-500 bg-[white] text-white'
-          onChange={(e) => setPassword(e.target.value)}
-          required 
-        />
+    <div className="min-h-screen bg-[#0A0A2E] text-white">
+      {/* Animated Background */}
+      <div className="fixed inset-0">
+        <div className="absolute inset-0 bg-[url('/nebula.jpg')] opacity-30 bg-cover bg-center" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-blue-900/50 to-cyan-900/50" />
+      </div>
 
-        {error && <p className='text-red-500 mb-4'>{error}</p>}
-        
-        <div className='mb-4 text-center text-gray-300'>
-          <span className='text-sm text-black'>Already have an account? <Link to='/' className=' text-blue-500 hover:text-blue-300'>Sign in</Link></span>
+      <Navbar />
+      
+      <div className="relative flex justify-center items-center min-h-[calc(100vh-6rem)] px-4">
+        <div className="w-full max-w-md p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
+          <h2 className="text-4xl font-black mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-600">
+            Create Account
+          </h2>
+          
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <input 
+                type="email"
+                placeholder="Email"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 placeholder:text-white/50 text-white"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <input 
+                type="password"
+                placeholder="Password"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 placeholder:text-white/50 text-white"
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="p-4 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200">
+                {error}
+              </div>
+            )}
+
+            <div className="text-center text-white/70">
+              Already have an account?{' '}
+              <Link to="/" className="text-cyan-400 hover:text-cyan-300 transition-colors duration-300">
+                Sign in
+              </Link>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold shadow-lg shadow-purple-500/30 transition-all duration-300 disabled:opacity-50"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Creating Account...
+                </span>
+              ) : (
+                'Create Account'
+              )}
+            </button>
+          </div>
         </div>
-
-        <button 
-          onClick={handleSubmit}
-          disabled={loading}
-          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl w-full font-semibold transition-colors duration-300'
-        >
-          {loading ? 'Signing Up...' : 'Sign Up'}
-        </button>
       </div>
     </div>
-    </div>
-    </>
   )
 }
 

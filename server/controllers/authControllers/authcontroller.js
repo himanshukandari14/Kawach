@@ -56,7 +56,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
-        // check if user exists or not
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({
@@ -65,7 +64,6 @@ exports.login = async (req, res) => {
             });
         }
 
-        // compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(403).json({
@@ -74,26 +72,28 @@ exports.login = async (req, res) => {
             });
         }
 
-        // create payload for JWT
+        // Create payload with user ID and email
         const payload = {
-            id: user.id,
+            id: user._id,
             email: user.email
         };
 
         const token = generateToken(payload);
 
-        // send response with token
         return res.status(200).json({
             success: true,
             token,
-            user
+            user: {
+                id: user._id,
+                email: user.email
+            }
         });
 
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: error.message
         });
     }
 };

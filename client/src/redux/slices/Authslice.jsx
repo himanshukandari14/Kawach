@@ -16,36 +16,49 @@
     users: [],
     specificUserData: null,
     comments: [], // Added comments array to store post comments
+    documents: [], // Add this to store documents
   };
 
   export const loginUser = createAsyncThunk(
     "auth/login",
-    async ({ username, password }, { rejectWithValue }) => {
+    async ({ email, password }, { rejectWithValue }) => {
       try {
         const response = await axios.post(`${API_BASE_URL}/login`, {
-          username,
+          email,
           password,
         });
+        
+        // Store token and user in localStorage
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+        }
+        
         return response.data;
       } catch (err) {
-        return rejectWithValue(err.response?.data || "Login failed");
+        return rejectWithValue(err.response?.data?.message || "Login failed");
       }
     }
   );
 
   export const signupUser = createAsyncThunk(
     "auth/signup",
-    async ({ email, password, name, username }, { rejectWithValue }) => {
+    async ({ email, password }, { rejectWithValue }) => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/sign-up`, {
+        const response = await axios.post(`${API_BASE_URL}/register`, {
           email,
           password,
-          name,
-          username,
         });
+        
+        // Store token in localStorage immediately
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+        }
+        
         return response.data;
       } catch (err) {
-        return rejectWithValue(err.response?.data || "Signup failed");
+        return rejectWithValue(err.response?.data?.message || "Signup failed");
       }
     }
   );
@@ -69,7 +82,7 @@
     "auth/fetchUserData",
     async (token, { rejectWithValue }) => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/fetchLoggedInUser`, {
+        const response = await axios.get(`${API_BASE_URL}/getuser`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -133,30 +146,6 @@
     }
   );
 
-  export const createPost = createAsyncThunk(
-    "auth/createPost",
-    async ({ title, media, token }, { rejectWithValue }) => {
-      try {
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("media", media);
-
-        const response = await axios.post(
-          `${API_BASE_URL}/createPost`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        return response.data;
-      } catch (err) {
-        return rejectWithValue(err.response?.data || "Failed to create post");
-      }
-    }
-  );
 
   export const deletePost = createAsyncThunk(
     "auth/deletePost",
@@ -177,55 +166,86 @@
     }
   );
 
-  export const createComment = createAsyncThunk(
-    "auth/createComment",
-    async ({ postId, comment, token }, { rejectWithValue }) => {
+ 
+
+
+
+  export const getUserFromToken = createAsyncThunk(
+    "auth/getUserFromToken",
+    async (_, { rejectWithValue }) => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          return rejectWithValue("No token found");
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/getuser`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (err) {
+        return rejectWithValue(err.response?.data?.message || "Failed to fetch user data");
+      }
+    }
+  );
+
+  export const uploadDocument = createAsyncThunk(
+    "/upload",
+    async ({ file, token }, { rejectWithValue }) => {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
         const response = await axios.post(
-          `${API_BASE_URL}/user/post/comment/${postId}`,
-          { text: comment },
+          `${API_BASE_URL}/upload`,
+          formData,
           {
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
             },
           }
         );
         return response.data;
       } catch (err) {
-        return rejectWithValue(err.response?.data || "Failed to create comment");
+        return rejectWithValue(err.response?.data || "Failed to upload document");
       }
     }
   );
 
-  export const fetchOnePostComments = createAsyncThunk(
-    "posts/fetchOnePostComments",
-    async (postId, { rejectWithValue }) => {
+  export const fetchUserDocuments = createAsyncThunk(
+    "auth/fetchUserDocuments",
+    async (token, { rejectWithValue }) => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/posts/${postId}/comments`
-        );
-        return response.data.comments;
+        const response = await axios.get(`${API_BASE_URL}/user/documents`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data.documents;
       } catch (err) {
-        return rejectWithValue(err.response?.data || "Failed to fetch comments");
+        return rejectWithValue(err.response?.data || "Failed to fetch documents");
       }
     }
   );
 
-  export const fetchSearchUser = createAsyncThunk(
-    "user/fetchSearchUser",
-    async ({ searchTerm, token }, { rejectWithValue }) => {
+  export const getDocumentById = createAsyncThunk(
+    "auth/getDocumentById",
+    async ({ id, token }, { rejectWithValue }) => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/search-users?query=${searchTerm}`,
+          `${API_BASE_URL}/user/documents/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        return response.data.users;
+        return response.data.document;
       } catch (err) {
-        return rejectWithValue(err.response?.data || "Failed to search users");
+        return rejectWithValue(err.response?.data || "Failed to fetch document");
       }
     }
   );
@@ -338,72 +358,61 @@
           state.error = action.payload;
         })
 
-        // Create post
-        .addCase(createPost.pending, (state) => {
+       
+
+        .addCase(getUserFromToken.pending, (state) => {
           state.loading = true;
           state.error = null;
         })
-        .addCase(createPost.fulfilled, (state, action) => {
+        .addCase(getUserFromToken.fulfilled, (state, action) => {
           state.loading = false;
-          state.posts = action.payload;
+          state.userData = action.payload;
         })
-        .addCase(createPost.rejected, (state, action) => {
+        .addCase(getUserFromToken.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+          // Clear user data if token is invalid
+          state.userData = null;
+          localStorage.removeItem('token');
+        })
+
+        // Upload document
+        .addCase(uploadDocument.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(uploadDocument.fulfilled, (state, action) => {
+          state.loading = false;
+          state.documents = [...state.documents, action.payload];
+        })
+        .addCase(uploadDocument.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         })
 
-        // Delete post
-        .addCase(deletePost.pending, (state) => {
+        // Fetch documents
+        .addCase(fetchUserDocuments.pending, (state) => {
           state.loading = true;
           state.error = null;
         })
-        .addCase(deletePost.fulfilled, (state, action) => {
+        .addCase(fetchUserDocuments.fulfilled, (state, action) => {
           state.loading = false;
-          state.posts = action.payload;
+          state.documents = action.payload;
         })
-        .addCase(deletePost.rejected, (state, action) => {
+        .addCase(fetchUserDocuments.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         })
 
-        // Create comment
-        .addCase(createComment.pending, (state) => {
+        .addCase(getDocumentById.pending, (state) => {
           state.loading = true;
           state.error = null;
         })
-        .addCase(createComment.fulfilled, (state, action) => {
+        .addCase(getDocumentById.fulfilled, (state, action) => {
           state.loading = false;
-          state.posts = action.payload;
+          state.currentDocument = action.payload;
         })
-        .addCase(createComment.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload;
-        })
-
-        // Fetch post comments
-        .addCase(fetchOnePostComments.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(fetchOnePostComments.fulfilled, (state, action) => {
-          state.loading = false;
-          state.comments = action.payload;
-        })
-        .addCase(fetchOnePostComments.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload;
-        })
-
-        // Search users
-        .addCase(fetchSearchUser.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(fetchSearchUser.fulfilled, (state, action) => {
-          state.loading = false;
-          state.users = action.payload;
-        })
-        .addCase(fetchSearchUser.rejected, (state, action) => {
+        .addCase(getDocumentById.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         });
