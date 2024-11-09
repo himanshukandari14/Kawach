@@ -289,3 +289,24 @@ exports.updateUserDetails = async (req, res) => {
         });
     }
 };
+
+
+// Logout Controller
+exports.logout = (req, res) => {
+    try {
+        // Optionally, you can clear the token from the client's cookies
+        res.clearCookie('token');  // Clear JWT token if it's stored in a cookie
+
+        // Respond with a success message
+        return res.status(200).json({
+            success: true,
+            message: 'Logout successful'
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
