@@ -34,8 +34,10 @@ app.use(cookieparser()); //for parsing cookie
 // Middleware to handle file uploads
 app.use(fileUpload({
   useTempFiles: true,
-  tempFileDir: path.join(__dirname, 'temp') // Ensure this folder exists or choose a valid path
+  tempFileDir: path.join(__dirname, 'temp'),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50 MB limit
 }));
+
 
 
 // listen to port
