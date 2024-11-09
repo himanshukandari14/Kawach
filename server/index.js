@@ -4,12 +4,21 @@ const cookieparser = require("cookie-parser");
 const cors = require("cors");
 const dbConnection = require("./config/database");
 const mongoose = require('mongoose');
+const fileUpload = require('express-fileupload');
+const path = require('path');  // Import the path module
 
 
 require("dotenv").config();
 
 const cookieParser = require('cookie-parser');
-const fileUpload=require('express-fileupload');
+
+
+// Middleware to parse incoming request bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware to handle file uploads
+app.use(fileUpload());
 
 const PORT = process.env.PORT || 8000;
 // middleware
@@ -21,11 +30,14 @@ app.use(
 
 app.use(express.json()); //for parsing body
 app.use(cookieparser()); //for parsing cookie
-app.use(express.urlencoded({ extended: true }));
+
+// Middleware to handle file uploads
 app.use(fileUpload({
   useTempFiles: true,
-  tempFileDir: '/tmp'
+  tempFileDir: path.join(__dirname, 'temp'),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50 MB limit
 }));
+
 
 
 // listen to port

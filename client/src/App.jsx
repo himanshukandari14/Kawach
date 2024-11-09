@@ -1,12 +1,14 @@
 import React from 'react'
+import LoginForm from './authComponent/LoginForm'
+import SignupForm from './authComponent/SignupForm'
+import Qrcode from './component/Qrcode'
 import Dashboard from './components/Header'
-import Profile from './components/Profile'
-
 
 const App = () => {
+  
   return (
     <div>
-      <Profile/>
+    <LoginForm/>
     </div>
   )
 }
