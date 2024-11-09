@@ -1,11 +1,12 @@
 import React from 'react'
 import Dashboard from './components/Header'
+import Profile from './components/Profile'
 
 
 const App = () => {
   return (
     <div>
-      <Dashboard/>
+      <Profile/>
     </div>
   )
 }
