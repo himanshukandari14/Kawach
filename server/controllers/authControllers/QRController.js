@@ -3,6 +3,7 @@ const QRCodeModel = require('../../models/QRCodeModel');
 const Document = require('../../models/DocumentModel');
 const crypto = require('crypto');
 const path = require('path');
+const fs = require('fs').promises;
 
 // QR Code Generation Controller
 exports.generateQRCode = async (req, res) => {
@@ -246,7 +247,8 @@ exports.verifyQRAccess = async (req, res) => {
 exports.printDocument = async (req, res) => {
   try {
     const { documentId, token } = req.params;
-    
+    console.log('Print request for:', { documentId, token });
+
     const qrCode = await QRCodeModel.findOne({
       document: documentId,
       printToken: token,
@@ -261,23 +263,67 @@ exports.printDocument = async (req, res) => {
       });
     }
 
-    // Mark QR code as used
-    qrCode.isUsed = true;
-    await qrCode.save();
-
-    // Send document for printing
-    res.setHeader('Content-Type', qrCode.document.mimeType);
-    res.setHeader('Content-Disposition', `inline; filename="${qrCode.document.title}"`);
+    const document = qrCode.document;
+    const filePath = path.join(__dirname, '../..', document.fileUrl);
     
-    // Send the file
-    const filePath = path.join(__dirname, '../../uploads', qrCode.document.fileUrl);
-    res.sendFile(filePath);
+    // Determine content type from file extension
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.pdf': 'application/pdf'
+    }[ext] || 'application/octet-stream';
 
+    console.log('Document details:', {
+      id: document._id,
+      title: document.title,
+      type: contentType,
+      path: filePath
+    });
+
+    try {
+      // Read file content
+      const fileContent = await fs.readFile(filePath);
+      console.log('File read:', {
+        size: fileContent.length,
+        type: contentType
+      });
+
+      // Set response headers
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Length': fileContent.length,
+        'Content-Disposition': `inline; filename="${document.title}"`,
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*'
+      });
+
+      // Send file content
+      res.end(fileContent);
+
+      // Mark QR code as used
+      qrCode.isUsed = true;
+      await qrCode.save();
+
+    } catch (error) {
+      console.error('File processing error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'Error processing file',
+          error: error.message
+        });
+      }
+    }
   } catch (error) {
     console.error('Print error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to print document'
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process print request',
+        error: error.message
+      });
+    }
   }
 };
