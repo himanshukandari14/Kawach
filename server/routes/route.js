@@ -32,12 +32,7 @@ router.get('/qr/:id', generateQRCode);
 
 
 
-// router.post('/createcourse',verifyToken,isMentor,createCourse);
-// router.delete('/deleteCourse/:id', verifyToken, deleteCourse); 
-// router.get('/course/:id',verifyToken,getCourse);
-// router.get('/user/search',searchCourse);
-// router.post('/user/updateDetails',verifyToken,updateUserDetails)
-// router.delete('/deleteaccount',verifyToken,deleteUser);
+
 
 // User and Document routes
 router.get('/user/profile', verifyToken, getUserDetails);
