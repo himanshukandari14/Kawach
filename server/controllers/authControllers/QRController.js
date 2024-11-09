@@ -2,6 +2,8 @@ const QRCode = require('qrcode');
 const QRCodeModel = require('../../models/QRCodeModel');
 const Document = require('../../models/DocumentModel');
 const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs').promises;
 
 // QR Code Generation Controller
 exports.generateQRCode = async (req, res) => {
@@ -21,38 +23,19 @@ exports.generateQRCode = async (req, res) => {
             });
         }
 
-        // Check for existing active QR code
-        const existingQR = await QRCodeModel.findOne({
-            document: documentId,
-            expiresAt: { $gt: new Date() }
-        });
-
-        if (existingQR) {
-            return res.status(200).json({
-                success: true,
-                message: 'Active QR code exists',
-                data: {
-                    qrCode: existingQR.qrCodeImage,
-                    expiresAt: existingQR.expiresAt,
-                    generatedAt: existingQR.generatedAt
-                }
-            });
-        }
-
         // Generate unique print token
         const printToken = crypto.randomBytes(32).toString('hex');
 
-        // Create temporary access URL
-        const accessUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/print/${documentId}/${printToken}`;
+        // Create temporary access URL with your IP address
+        const accessUrl = `http://192.168.0.253:5173/print/${documentId}/${printToken}`;
+        
+        console.log('Generated URL:', accessUrl); // Debug log
         
         // Generate QR code
         const qrCodeImage = await QRCode.toDataURL(accessUrl, {
             errorCorrectionLevel: 'H',
             margin: 2,
-            color: {
-                dark: '#000000',
-                light: '#ffffff'
-            }
+            width: 300
         });
 
         // Calculate expiry time (5 minutes from now)
@@ -70,12 +53,10 @@ exports.generateQRCode = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'QR code generated successfully',
             data: {
                 qrCode: qrCodeImage,
                 expiresAt,
-                generatedAt: newQRCode.generatedAt,
-                printUrl: accessUrl
+                printToken
             }
         });
 
@@ -83,8 +64,7 @@ exports.generateQRCode = async (req, res) => {
         console.error('QR generation error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error generating QR code',
-            error: error.message
+            message: 'Failed to generate QR code'
         });
     }
 };
@@ -226,4 +206,124 @@ exports.invalidateQRCode = async (req, res) => {
             error: error.message
         });
     }
+};
+
+// Verify QR access
+exports.verifyQRAccess = async (req, res) => {
+  try {
+    const { documentId, token } = req.params;
+    
+    const qrCode = await QRCodeModel.findOne({
+      document: documentId,
+      printToken: token,
+      expiresAt: { $gt: new Date() },
+      isUsed: false
+    }).populate('document');
+
+    if (!qrCode) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid or expired QR code'
+      });
+    }
+
+    res.json({
+      success: true,
+      document: {
+        title: qrCode.document.title,
+        id: qrCode.document._id
+      }
+    });
+  } catch (error) {
+    console.error('QR verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to verify QR code'
+    });
+  }
+};
+
+// Handle print request
+exports.printDocument = async (req, res) => {
+  try {
+    const { documentId, token } = req.params;
+    console.log('Print request for:', { documentId, token });
+
+    const qrCode = await QRCodeModel.findOne({
+      document: documentId,
+      printToken: token,
+      expiresAt: { $gt: new Date() },
+      isUsed: false
+    }).populate('document');
+
+    if (!qrCode) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid or expired QR code'
+      });
+    }
+
+    const document = qrCode.document;
+    const filePath = path.join(__dirname, '../..', document.fileUrl);
+    
+    // Determine content type from file extension
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.pdf': 'application/pdf'
+    }[ext] || 'application/octet-stream';
+
+    console.log('Document details:', {
+      id: document._id,
+      title: document.title,
+      type: contentType,
+      path: filePath
+    });
+
+    try {
+      // Read file content
+      const fileContent = await fs.readFile(filePath);
+      console.log('File read:', {
+        size: fileContent.length,
+        type: contentType
+      });
+
+      // Set response headers
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Length': fileContent.length,
+        'Content-Disposition': `inline; filename="${document.title}"`,
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*'
+      });
+
+      // Send file content
+      res.end(fileContent);
+
+      // Mark QR code as used
+      qrCode.isUsed = true;
+      await qrCode.save();
+
+    } catch (error) {
+      console.error('File processing error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'Error processing file',
+          error: error.message
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Print error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process print request',
+        error: error.message
+      });
+    }
+  }
 };

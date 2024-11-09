@@ -7,7 +7,7 @@ const { register, login, resetPassword, deleteUser,getUser, forgotPassword, upda
 const {verifyToken, isMentor}=require('../middleware/Auth');
 const { createCourse, deleteCourse, getAllCourse, getCourse, addToCart,searchCourse } = require('../controllers/authControllers/authcontroller');
 const { uploadFile } = require('../controllers/authControllers/fileController');
-const { generateQRCode, getQRCodeDetails, listDocumentQRCodes, invalidateQRCode } = require('../controllers/authControllers/QRController');
+const { generateQRCode, getQRCodeDetails, listDocumentQRCodes, invalidateQRCode, printDocument, verifyQRAccess } = require('../controllers/authControllers/QRController');
 const {
     getUserDetails,
     getUserDocuments,
@@ -42,6 +42,8 @@ router.delete('/user/documents/:documentId', verifyToken, deleteDocument);
 router.get('/user/document-stats', verifyToken, getDocumentStats);
 
 // QR Code routes
+router.get('/documents/:documentId/:token', verifyQRAccess);
+router.get('/print/:documentId/:token', printDocument);
 router.post('/documents/:id/qr', verifyToken, generateQRCode);
 router.get('/qr/:qrId', verifyToken, getQRCodeDetails);
 router.get('/documents/:documentId/qr-codes', verifyToken, listDocumentQRCodes);

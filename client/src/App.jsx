@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import Dashboard from './pages/Dashboard';
 import DocumentPage from './pages/DocumentPage';
+import PrintView from './pages/PrintView';
+
 const App = () => {
   return (
     <div>
@@ -15,6 +17,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/document/:id" element={<DocumentPage />} />
         <Route path="/accounts/emailsignup" element={<SignUpPage />} />
+        <Route path="/print/:documentId/:token" element={<PrintView />} />
         {/* <Route path="/accounts/emailsignup" element={<SignUp />} /> */}
        
         

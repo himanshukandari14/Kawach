@@ -13,7 +13,7 @@ require("dotenv").config();
 app.use(express.json());
 app.use(cookieparser());
 app.use(cors({
-    origin: "*",
+    origin: ['http://192.168.0.253:5173', 'http://localhost:5173'],
     credentials: true
 }));
 
@@ -51,9 +51,8 @@ const routes = require("./routes/route");
 app.use(routes);
 
 // Start server
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-    console.log(`Server listening on ${PORT}`);
+app.listen(8000, '0.0.0.0', () => {
+    console.log('Server running on http://192.168.0.253:8000');
 });
 
 // Database connection
