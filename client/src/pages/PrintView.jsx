@@ -15,11 +15,16 @@ const PrintView = () => {
       try {
         console.log('Verifying access for:', documentId, token);
         const response = await axios.get(
-          `http://192.168.0.253:8000/verify/${documentId}/${token}`
+          `${import.meta.env.VITE_API_BASE_URL}/documents/${documentId}/${token}`
         );
-        console.log('Verification response:', response.data);
-        setDocument(response.data.document);
-        setLoading(false);
+        
+        if (response.data.success) {
+          setDocument(response.data.document);
+          setLoading(false);
+        } else {
+          setError('Invalid QR code');
+          setLoading(false);
+        }
       } catch (error) {
         console.error('Verification failed:', error);
         setError('This QR code has expired or is invalid');
@@ -33,7 +38,7 @@ const PrintView = () => {
   const handlePrint = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.0.253:8000/print/${documentId}/${token}`,
+        `${import.meta.env.VITE_API_BASE_URL}/print/${documentId}/${token}`,
         { responseType: 'blob' }
       );
       

@@ -13,7 +13,7 @@ require("dotenv").config();
 app.use(express.json());
 app.use(cookieparser());
 app.use(cors({
-    origin: "*",
+    origin: ['http://192.168.0.253:5173', 'http://localhost:5173'],
     credentials: true
 }));
 
