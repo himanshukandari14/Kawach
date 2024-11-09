@@ -15,6 +15,14 @@ const documentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  encryptionKey: {
+    type: String,
+    required: true,
+  },
+  encryptionIv: {
+    type: String,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -23,6 +31,18 @@ const documentSchema = new mongoose.Schema({
     type: Date,
     default: null, // Set on QR generation
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  qrCode: {
+    type: String,
+    default: null
+  },
+  printToken: {
+    type: String,
+    default: null
+  }
 });
 
 const Document = mongoose.model('Document', documentSchema);

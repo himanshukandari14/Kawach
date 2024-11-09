@@ -19,7 +19,18 @@ const qrCodeSchema = new mongoose.Schema({
     type: String, // This will store the QR code as a data URL or file path
     required: true,
   },
+  printToken: {
+    type: String,
+    required: true,
+  },
+  isUsed: {
+    type: Boolean,
+    default: false
+  }
 });
+
+// Add index for faster queries
+qrCodeSchema.index({ document: 1, expiresAt: 1 });
 
 const QRCode = mongoose.model('QRCode', qrCodeSchema);
 

@@ -3,50 +3,58 @@ const app = express();
 const cookieparser = require("cookie-parser");
 const cors = require("cors");
 const dbConnection = require("./config/database");
-const mongoose = require('mongoose');
 const fileUpload = require('express-fileupload');
-const path = require('path');  // Import the path module
-
+const path = require('path');
+const fs = require('fs');
 
 require("dotenv").config();
 
-const cookieParser = require('cookie-parser');
-
-
-// Middleware to parse incoming request bodies
+// Middleware configuration
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Middleware to handle file uploads
-app.use(fileUpload());
-
-const PORT = process.env.PORT || 8000;
-// middleware
-app.use(
-  cors({
+app.use(cookieparser());
+app.use(cors({
     origin: "*",
-  })
-);
-
-app.use(express.json()); //for parsing body
-app.use(cookieparser()); //for parsing cookie
-
-// Middleware to handle file uploads
-app.use(fileUpload({
-  useTempFiles: true,
-  tempFileDir: path.join(__dirname, 'temp'),
-  limits: { fileSize: 50 * 1024 * 1024 } // 50 MB limit
+    credentials: true
 }));
 
+// Configure file upload - IMPORTANT: Remove duplicate fileUpload middleware
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: path.join(__dirname, 'temp'),
+    createParentPath: true,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    abortOnLimit: true,
+    responseOnLimit: "File size limit has been reached",
+    debug: true, // Enable debugging
+    uploadTimeout: 60000, // 60 seconds timeout
+}));
 
+// Static file serving
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// listen to port
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
-// db connect
-dbConnection();
+// Create necessary directories
+const uploadDir = path.join(__dirname, 'uploads');
+const tempDir = path.join(__dirname, 'temp');
 
-//import route
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+}
+
+// Routes
 const routes = require("./routes/route");
 app.use(routes);
+
+// Start server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+    console.log(`Server listening on ${PORT}`);
+});
+
+// Database connection
+dbConnection();
