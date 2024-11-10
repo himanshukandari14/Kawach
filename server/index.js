@@ -51,7 +51,7 @@ const routes = require("./routes/route");
 app.use(routes);
 
 // Start server
-app.listen(8000, '0.0.0.0', () => {
+app.listen(process.env.PORT, '0.0.0.0', () => {
     console.log('Server running on http://192.168.0.253:8000');
 });
 
