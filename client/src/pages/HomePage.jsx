@@ -23,7 +23,7 @@ const HomePage = () => {
               <Link to="/login" className="px-8 py-3 rounded-full text-white/90 hover:text-white border border-white/20 hover:border-white/40 transition-all duration-300">
                 Login
               </Link>
-              <Link to="/signup" className="px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition-all duration-300">
+              <Link to="/accounts/emailsignup" className="px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition-all duration-300">
                 Get Started
               </Link>
             </div>
@@ -44,9 +44,11 @@ const HomePage = () => {
               Next-generation encryption meets elegant simplicity
             </p>
             <div className="pt-8">
+              <Link to="/accounts/emailsignup">
               <button className="px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:scale-105 transition-all duration-300 shadow-lg shadow-purple-500/25">
                 Experience The Future
               </button>
+              </Link>
             </div>
           </div>
 
@@ -86,7 +88,7 @@ const HomePage = () => {
           <div className="grid md:grid-cols-3 gap-12 mt-32 text-center">
             {[
               { value: "99.99%", label: "Uptime", color: "text-cyan-400" },
-              { value: "10M+", label: "Users", color: "text-purple-400" },
+              { value: "90%", label: "Fast", color: "text-purple-400" },
               { value: "24/7", label: "Support", color: "text-pink-400" }
             ].map((stat, i) => (
               <div key={i} className="space-y-2">
