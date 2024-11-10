@@ -13,7 +13,7 @@ require("dotenv").config();
 app.use(express.json());
 app.use(cookieparser());
 app.use(cors({
-    origin: ['http://192.168.0.253:5173', 'http://localhost:5173'],
+    origin: ['http://192.168.0.253:5173', 'http://localhost:5173', 'https://your-frontend-url.com'], // Add production frontend URL
     credentials: true
 }));
 
@@ -50,7 +50,7 @@ if (!fs.existsSync(tempDir)) {
 const routes = require("./routes/route");
 app.use(routes);
 
-// Start server
+// Start server - Listen on dynamic port provided by Render
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
