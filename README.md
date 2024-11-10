@@ -5,8 +5,8 @@ Kawach is a MERN stack app designed to provide **secure and private document sha
 ## 👨‍💻 Contributors
 - Himanshu Kandari
 - Vansh Tyagi
-- Sujal Anun
-- J Pal
+- Sujal Raj
+- Anuj Pal
 
 ## ⚡ Features
 - **📄 Document Upload**: Securely upload your documents with encryption.
