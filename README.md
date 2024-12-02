@@ -66,7 +66,7 @@ If you have any questions, suggestions, or feedback, feel free to reach out to u
 - **Email**:
 - [himanshukandari14@gmail.com](himanshukandari14@gmail.com)
 - [rajsujal2004@gmail.com](rajsujal2004@gmail.com)
-- [vanshgii021@gmail.com](vanshgii021@gmail.com)
+- [vanshgii021@gmail.com](vanshjii021@gmail.com)
 - [palanuj830@gmail.com](palanuj830@gmail.com)
 
 We’re excited to connect with you and appreciate your interest in Kawach!
