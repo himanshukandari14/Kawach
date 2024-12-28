@@ -26,8 +26,11 @@ exports.generateQRCode = async (req, res) => {
         // Generate unique print token
         const printToken = crypto.randomBytes(32).toString('hex');
 
-        // Create temporary access URL with your IP address
-        const accessUrl = `http://192.168.0.253:5173/print/${documentId}/${printToken}`;
+        // Get the frontend URL from environment variable or use a default
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        
+        // Create temporary access URL using the dynamic frontend URL
+        const accessUrl = `${frontendUrl}/print/${documentId}/${printToken}`;
         
         console.log('Generated URL:', accessUrl); // Debug log
         

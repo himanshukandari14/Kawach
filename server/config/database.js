@@ -7,4 +7,5 @@ const dbConnection=()=>{
  .catch((error)=>{console.log('error in connection to db:',error)})
 }
 
-module.exports=dbConnection;
+module.exports = dbConnection;
+
