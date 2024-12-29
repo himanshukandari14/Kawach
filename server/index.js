@@ -34,6 +34,10 @@ app.use(fileUpload({
   uploadTimeout: 60000, // 60 seconds timeout
 }));
 
+app.get('/', (req, res) => {
+  res.render('home.ejs', { title: 'Home' });
+});
+
 // Static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
