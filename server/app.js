@@ -12,15 +12,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-
 // CORS configuration
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if(!origin) return callback(null, true);
-    callback(null, true);
-  },
+  origin: 'http://localhost:5173',
   credentials: true
 }));
 
