@@ -53,13 +53,36 @@ if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir, { recursive: true });
 }
 
-
 // Database connection
 dbConnection();
 
 // Routes
 const routes = require("./routes/route");
 app.use(routes);
+
+app.post('/upload', async (req, res) => {
+  try {
+    if (!req.files || !req.files.file) {
+      return res.status(400).send('No file was uploaded.');
+    }
+
+    const file = req.files.file;
+    const uploadPath = path.join(__dirname, 'uploads', file.name);
+
+    // Create uploads directory if it doesn't exist
+    if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+      fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
+    }
+
+    // Move the file to uploads directory
+    await file.mv(uploadPath);
+    
+    res.send('File uploaded successfully!');
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).send('Error occurred while uploading the file.');
+  }
+});
 
 const PORT = process.env.PORT || 8000;
 
