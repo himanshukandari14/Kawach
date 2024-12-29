@@ -13,8 +13,7 @@ yarn-error.log*
 .env.*
 
 # Build directories
-/dist
-/build
+
 
 # Database files (for MongoDB, if using local database)
 *.db
