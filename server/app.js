@@ -12,6 +12,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Serve static files from the dist directory
+app.use(express.static(path.join(__dirname, 'dist'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-cache');
+  }
+}));
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-cache');
+    if (path.extname(filePath).toLowerCase() === '.jpg') {
+      res.setHeader('Content-Type', 'image/jpeg');
+    }
+  }
+})); 
+
 // CORS configuration
 app.use(cors({
   origin: 'http://localhost:5173',
